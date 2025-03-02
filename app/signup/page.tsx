@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/router";
 import { signUp } from "../../backend/auth";
 
 interface SignUpFormData {
@@ -12,13 +11,11 @@ interface SignUpFormData {
 
 const SignupPage: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormData>();
-  const router = useRouter();
 
   const onSubmit: SubmitHandler<SignUpFormData> = async (data) => {
     try {
       const user = await signUp(data.email, data.password);
       console.log("Signed up user:", user);
-      router.push("/jobs");
     } catch (error) {
       console.error("Error signing up:", error);
     }
