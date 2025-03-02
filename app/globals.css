@@ -3,19 +3,274 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary: #FCE7C8;
+  --color-secondary: #B1C29E;
+  --color-accent: #FADA7A;
+  --color-highlight: #F0A04B;
+  --color-text: #213547;
+  --color-text-light: rgba(255, 255, 255, 0.87);
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light white;
+  color: var(--color-text);
+  background-color: var(--color-primary);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root{
+  --color-primary-dark: #181C14;
+  --color-secondary-dark: #3C3D37;
+  --color-accent-dark: #697565;
+  --color-highlight-dark: #A9A87E;
+  --color-text-dark: #E2E8F0;
+}
+
+[data-theme="dark"] {
+  --color-primary: var(--color-primary-dark);
+  --color-secondary: var(--color-secondary-dark);
+  --color-accent: var(--color-accent-dark);
+  --color-highlight: var(--color-highlight-dark);
+  --color-text: var(--color-text-dark);
+  --color-text-light: rgba(255, 255, 255, 0.87);
+  background-color: var(--color-primary-dark);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] body {
+  background-color: var(--color-primary-dark);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] button {
+  background-color: var(--color-highlight);
+  color: var(--color-text-light);
+}
+
+[data-theme="dark"] .job-card {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .job-modal-content {
+  background-color: var(--color-secondary);
+  color: var(--color-text-light);
+}
+
+[data-theme="dark"] .header {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+}
+
+
+p {
+  font-weight: 500;
+  color: black;
+  text-decoration: inherit;
+}
+
+a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-highlight);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-primary);
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+h2 {
+  font-size: 2.4em;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+h3 {
+  font-size: 1.9em;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+input{
+  flex: 1; 
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  margin-right: 10px; 
+  box-sizing: border-box;
+  width: 250px;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--color-highlight);
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: border-color 0.25s, background-color 0.3s;
+}
+
+button:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-secondary);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.job-card {
+  border: 1px solid var(--color-secondary);
+  margin: 10px;
+  padding: 10px;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.job-card-content {
+  flex-grow: 1;
+}
+
+.job-card-arrow {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.job-modal {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.job-modal-content {
+  background-color: var(--color-primary);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid var(--color-secondary);
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  position: relative;
+}
+
+.job-modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.job-section {
+  margin-bottom: 1rem;
+}
+
+.job-section h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: var(--color-highlight);
+}
+
+.job-section p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid var(--color-highlight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: rgb(153, 245, 143);
+  animation: spin 1s ease infinite;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+}
+
+.loading-container p {
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: var(--color-text);
+    background-color: var(--color-primary);
+  }
+  a:hover {
+    color: var(--color-accent);
+  }
+  button {
+    background-color: var(--color-highlight);
+  }
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import JobList, { Job } from "../components/joblist";
-import Loader from "../components/loader";
-import SearchBar from "../components/searchbar";
-import { fetchJobs } from "../api/jobApi";
-import { supabase } from "../backend/supabaseClient";
+import JobList, { Job } from "../../components/joblist";
+import Loader from "../../components/loader";
+import SearchBar from "../../components/searchbar";
+import { fetchJobs } from "../../api/jobApi";
+import { supabase } from "../../backend/supabaseClient";
 
-const HomePage: React.FC = () => {
+const JobsPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -51,6 +51,34 @@ const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const handleSearch = async () => {
+      if (searchTerm.trim() === "") return;
+
+      setIsLoading(true);
+      setError("");
+      setSearchPerformed(true);
+      try {
+        const jobResults = await fetchJobs(searchTerm, {});
+        console.log("Job Results:", jobResults);
+
+        if (!jobResults || jobResults.length === 0) {
+          setError(`Det finns inga jobb som matchar söktermen "${searchTerm}".`);
+          setJobs([]);
+        } else {
+          setJobs(jobResults);
+        }
+      } catch (error) {
+        console.error("Fel vid hämtning av jobb:", error);
+        setError("Misslyckades att hämta jobb. Försök igen.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    handleSearch();
+  }, [searchTerm]);
+
+  useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -71,25 +99,9 @@ const HomePage: React.FC = () => {
     setUser(null);
   };
 
-  const handleSearchInput = (query: string, filters: { [key: string]: string }) => {
-    console.log("Search Query:", query);
-    console.log("Filters:", filters);
-    setSearchTerm(query);
-    setSearchPerformed(true);
-    setIsLoading(true);
-    setError("");
-    fetchJobs(query, filters)
-      .then((jobResults) => {
-        setJobs(jobResults);
-      })
-      .catch((error) => {
-        console.error("Fel vid hämtning av jobb:", error);
-        setError("Misslyckades att hämta jobb. Försök igen.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+  function handleSearchInput(_query: string): void {
+    setSearchTerm(_query);
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -99,10 +111,11 @@ const HomePage: React.FC = () => {
           {user ? (
             <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded">Logga ut</button>
           ) : (
-            <div className="flex gap-2">
-              <a href="/signin" className="px-4 py-2 bg-green-500 text-white rounded">Logga in</a>
-              <a href="/signup" className="px-4 py-2 bg-green-500 text-white rounded">Registrera dig</a>
-            </div>
+            <>
+            <a href="./signin" className="px-4 py-2 bg-green-500 text-white rounded">Logga in</a>
+            <a href="./signup" className="px-4 py-2 bg-green-500 text-white rounded">Registrera dig</a>
+          </>
+
           )}
           <button onClick={toggleDarkMode} className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded">
             {darkMode ? "☀️" : "🌙"}
@@ -119,11 +132,9 @@ const HomePage: React.FC = () => {
       )}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {searchPerformed && !isLoading && !error && jobs.length === 0 && <p>Det finns inga jobb som matchar {searchTerm}.</p>}
-      <div className="card-container">
       <JobList jobs={jobs} userId={""} />
-      </div>
     </div>
   );
 };
 
-export default HomePage;
+export default JobsPage;
