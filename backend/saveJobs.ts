@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { Job } from "@/components/joblist";
 // import { auth.signIn } from "@supabase/supabase-js";
 
 export const saveJob = async (userId: string, jobId: string) => {
@@ -21,25 +22,35 @@ export const saveJob = async (userId: string, jobId: string) => {
 };
 
 export const getSavedJobs = async (userId: string) => {
-  const { data: savedJobs, error: savedJobsError } = await supabase
+  const { data, error } = await supabase
     .from("Saved_jobs")
     .select("job_id")
     .eq("user_id", userId);
 
-  if (savedJobsError) {
-    throw savedJobsError;
-  }
+  if (error) throw error;
+  return data.map((item) => item.job_id);
 
-  const jobIds = savedJobs.map((savedJob) => savedJob.job_id);
+  // const jobIds = savedJobs.map((savedJob) => savedJob.job_id);
 
-  const { data: jobs, error: jobsError } = await supabase
-    .from("jobs")
+  // const { data: jobs, error: jobsError } = await supabase
+  //   .from("jobs")
+  //   .select("*")
+  //   .in("id", jobIds);
+
+  // if (jobsError) {
+  //   throw jobsError;
+  // }
+
+  // return jobs;
+};
+
+export const fetchJobById = async (id: string): Promise<Job> => {
+  const { data, error } = await supabase
+    .from("Jobs")
     .select("*")
-    .in("id", jobIds);
+    .eq("id", id)
+    .single();
 
-  if (jobsError) {
-    throw jobsError;
-  }
-
-  return jobs;
+  if (error || !data) throw new Error("Job not found");
+  return data as Job;
 };

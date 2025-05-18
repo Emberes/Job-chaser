@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faSave } from "@fortawesome/free-solid-svg-icons";
-import { saveJob } from "../backend/saveJobs";
+// import { saveJob } from "../backend/saveJobs";
+import { supabase } from "@/backend/supabaseClient";
 
 
 export interface Job {
@@ -35,7 +36,7 @@ export interface JobListProps {
   userId: string;
 }
 
-const JobList: React.FC<JobListProps> = ({ jobs = [], userId}) => {
+const JobList: React.FC<JobListProps> = ({ jobs = []}) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const handleJobClick = (job: Job) => {
@@ -46,20 +47,33 @@ const JobList: React.FC<JobListProps> = ({ jobs = [], userId}) => {
     setSelectedJob(null);
   };
 
-  const handleSaveJob = async (jobId: string) => {
-    console.log("job ID:", jobId, "user ID:", userId);
-    if (!jobId) {
-      console.error("Error: userId or jobId is missing!");
+  const handleSaveJob = async ( jobId: string ) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+  
+    if (!user) {
+      console.error("Ingen användare inloggad");
       return;
     }
-    try {
-      await saveJob(userId, jobId);
-      alert("Job saved successfully!");
-    } catch (error) {
-      console.error("Error saving job:", error);
-      alert("Failed to save job.");
+  
+    const { data, error } = await supabase
+      .from("Saved_jobs")
+      .insert([
+        {
+          user_id: user.id,
+          job_id: jobId,
+        },
+      ]);
+  
+    if (error) {
+      console.error("Fel vid sparning:", error.message);
+    } else {
+      console.log("Jobb sparat:", data);
     }
   };
+
+  
 
   return (
     <div>
@@ -67,9 +81,11 @@ const JobList: React.FC<JobListProps> = ({ jobs = [], userId}) => {
         <div key={job.id} className="job-card" onClick={() => handleJobClick(job)}>
           <div className="job-card-content">
             <h2>{job.headline}</h2>
-            {job.description.requirements && <p>Requirements: {job.description.requirements}</p>}
-            {job.workplace_address.city && <p>City: {job.workplace_address.city}</p>}
-            {job.workplace_address.region && <p>Region: {job.workplace_address.region}</p>}          </div>
+            <p className="text-sm text-black-500">Jobb ID: {job.id}</p>
+            {job.description.requirements && <p>Krav: {job.description.requirements}</p>}
+            {job.workplace_address.city && <p>Stad: {job.workplace_address.city}</p>}
+            {job.workplace_address.region && <p>Region: {job.workplace_address.region}</p>} 
+            </div>
           <FontAwesomeIcon icon={faExpand} />
           <FontAwesomeIcon icon={faSave} onClick={() => handleSaveJob(job.id)} />
         </div>
@@ -84,18 +100,18 @@ const JobList: React.FC<JobListProps> = ({ jobs = [], userId}) => {
               <h3>{selectedJob.description.company_information.name}</h3>
             )}
             <div className="job-section">
-              <h4>Description</h4>
+              <h4>Beskrivning</h4>
               <p>{selectedJob.description.text}</p>
             </div>
             {selectedJob.description.needs && (
               <div className="job-section">
-                <h4>Needs</h4>
+                <h4>Kvalifikationer</h4>
                 <p>{selectedJob.description.needs}</p>
               </div>
             )}
             {selectedJob.description.requirements && (
               <div className="job-section">
-                <h4>Requirements</h4>
+                <h4>Krav</h4>
                 <p>{selectedJob.description.requirements}</p>
               </div>
             )}
@@ -106,14 +122,15 @@ const JobList: React.FC<JobListProps> = ({ jobs = [], userId}) => {
               </div>
             )}
              <div className="job-section">
-              <h4>Location</h4>
-              {selectedJob.workplace_address.city && <p>City: {selectedJob.workplace_address.city}</p>}
+              <h4>Plats</h4>
+              {selectedJob.workplace_address.city && <p>Stad: {selectedJob.workplace_address.city}</p>}
               {selectedJob.workplace_address.region && <p>Region: {selectedJob.workplace_address.region}</p>}
             </div>
             <div className="job-section">
-              <h4>Employer</h4>
+              <h4>Arbetsgivare</h4>
               <p>{selectedJob.employer.name}</p>
               <p>Website: <a href={selectedJob.employer.url} target="_blank" rel="noopener noreferrer">{selectedJob.employer.url}</a></p>
+              
             </div>
           </div>
         </div>

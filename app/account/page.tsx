@@ -4,10 +4,15 @@ import React, { useEffect, useState } from "react";
 import JobList, { Job } from "../../components/joblist";
 import { getSavedJobs } from "../../backend/saveJobs";
 import { supabase } from "../../backend/supabaseClient";
+import { fetchJobById } from "../../api/jobApi";
+import { useAuth } from "@/context/AuthContext";
+
+
 // import { User } from "@supabase/auth-js";
 
 
 const SavedJobsPage: React.FC = () => {
+    const { user, isAuthenticated } = useAuth();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -31,25 +36,53 @@ const SavedJobsPage: React.FC = () => {
         fetchUser();
       }, []);
 
+      
       useEffect(() => {
         const fetchSavedJobs = async () => {
-          if (!userId) return;
-    
+          if (!user?.id) return;
+      
           setIsLoading(true);
           setError("");
+      
           try {
-            const savedJobs = await getSavedJobs(userId);
-            setJobs(savedJobs);
+            let failedCount = 0;
+
+            const savedJobIds = await getSavedJobs(user.id);
+            const jobData = await Promise.all(
+              savedJobIds.map(async (id) => {
+                try {
+                  return await fetchJobById(id);
+                } catch (error) {
+                  console.error(`Error fetching job with ID ${id}:`, error);
+                  failedCount++
+                  return null;
+                }
+              })
+            );
+      
+            const filteredJobs = jobData.filter((job): job is Job => job !== null);
+            setJobs(filteredJobs);
+            if (failedCount > 0) {
+              setError(`${failedCount} sparade jobb kunde inte hämtas (de kan ha tagits bort från Jobtech).`);
+            }
           } catch (error) {
             console.error("Error fetching saved jobs:", error);
-            setError("Failed to fetch saved jobs. Please try again.");
+            setError("Misslyckades att hämta sparade jobb. Försök igen.");
           } finally {
             setIsLoading(false);
           }
         };
+      
         fetchSavedJobs();
-      }, [userId]);
+      }, [user]);
 
+      if (!isAuthenticated) {
+        return (
+          <div className="p-6">
+            <h2 className="text-xl font-bold">Du måste vara inloggad för att se dina sparade jobb.</h2>
+          </div>
+        );
+      }
 
       return (
         <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">

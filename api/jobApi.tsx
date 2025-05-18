@@ -1,3 +1,5 @@
+import { Job } from "../components/joblist";
+
 export const fetchJobs = async (query: string, filters: { [key: string]: string; }) => {
 
 
@@ -22,10 +24,19 @@ export const fetchJobs = async (query: string, filters: { [key: string]: string;
         const data = await response.json();
         return data.hits || [];
       } catch (error) {
-        console.error(error);
         throw error;
       }
     };
 
+    export const fetchJobById = async (id: string): Promise<Job> => {
+      const res = await fetch(`https://jobsearch.api.jobtechdev.se/job/${id}`);
+    
+      if (!res.ok) {
+        throw new Error(`Kunde inte hämta jobb med id: ${id}`);
+      }
+    
+      const data = await res.json();
+      return data as Job;
+    };
 
   
