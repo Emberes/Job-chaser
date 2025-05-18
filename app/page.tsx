@@ -60,7 +60,6 @@ const HomePage: React.FC = () => {
     return (
       <div className="min-h-screen custom-background text-custom-text">
       <header className="flex flex-col lg:flex-row justify-between items-center p-5 custom-header text-center lg:text-left">
-        <h1 className="text-2xl font-bold">Job Chaser!</h1>
         <h3 className="text-center text-lg">Hitta ditt nya drömjobb snabbt och enkelt! 🐱‍💻</h3>
         <div className="flex items-center gap-4">
           {user ? (
